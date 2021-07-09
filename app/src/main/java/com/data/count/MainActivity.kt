@@ -19,10 +19,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         findViewById<View>(R.id.connect).setOnClickListener {
-            DBConnectUtils.connectDB()
+            Thread {
+                DBConnectUtils.connectDB()
+                val sql = "INSERT INTO test VALUES(2)"
+                DBConnectUtils.executeSql(sql)
+            }.start()
         }
         findViewById<View>(R.id.close).setOnClickListener {
-
+            Thread {
+                DBConnectUtils.disconnectDB()
+            }.start()
         }
     }
 }

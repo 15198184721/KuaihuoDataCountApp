@@ -18,7 +18,7 @@ object DBConnectUtils {
 
     //连接数据库（jcdz是数据库名）,xxxxxx是数据库实例的外网地址，打开阿里云数据库在基本信息中可以查看
     private var dbUrl =
-        "jdbc:mysql://rm-bp1u15ekqqd90x79lso.mysql.rds.aliyuncs.com/kuaihuo_data_count?zeroDateTimeBehavior=convertToNull&amp;user=$dbUserName&amp;password=$dbUserPass&amp;useUnicode=true&amp;characterEncoding=UTF8"
+        "jdbc:mysql://rm-dp-extranet-connect-addr.mysql.rds.aliyuncs.com/kuaihuo_data_count?zeroDateTimeBehavior=convertToNull&user=$dbUserName&password=$dbUserPass&useUnicode=true&characterEncoding=UTF8"
 
     // 数据库连接状态，T:已连接，F:未连接
     private var dbConnectStatus = false
@@ -28,29 +28,38 @@ object DBConnectUtils {
 
     /**
      * 连接数据库实例
+     * @return T:成功,F:失败
      */
-    fun connectDB() {
+    fun connectDB(): Boolean {
         try {
-            val jdbcClass = Class.forName(dbDriver)
-            val dbContent: Connection = DriverManager.getConnection(dbUrl)
-            dbStmt = dbContent.createStatement()
+            if (!dbConnectStatus && dbStmt == null) {
+                val jdbcClass = Class.forName(dbDriver)
+                val dbContent: Connection = DriverManager.getConnection(dbUrl)
+                dbStmt = dbContent.createStatement()
+            }
             dbConnectStatus = true
         } catch (e: Exception) {
             e.printStackTrace()
             dbConnectStatus = false
         }
+        return dbConnectStatus
     }
 
     /**
      * 断开数据库连接
+     * @return T:成功,F:失败
      */
-    fun disconnectDB() {
+    fun disconnectDB(): Boolean {
         try {
+            if (dbConnectStatus) {
+                dbStmt?.close()
+                dbStmt = null
+            }
             dbConnectStatus = false
-            dbStmt?.close()
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        return dbConnectStatus
     }
 
     /**
@@ -60,6 +69,9 @@ object DBConnectUtils {
      */
     fun executeSql(sql: String): Boolean {
         return try {
+            if (!dbConnectStatus || dbStmt == null) {
+                return false
+            }
             dbStmt?.execute(sql) ?: false
         } catch (e: SQLException) {
             e.printStackTrace()
@@ -74,6 +86,9 @@ object DBConnectUtils {
      */
     fun executeUpdateSql(sql: String): Boolean {
         return try {
+            if (!dbConnectStatus || dbStmt == null) {
+                return false
+            }
             dbStmt?.executeUpdate(sql) != 0
         } catch (e: SQLException) {
             e.printStackTrace()
