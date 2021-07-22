@@ -1,34 +1,76 @@
 package com.data.count
 
+import android.app.Fragment
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.ui.AppBarConfiguration
 import com.data.count.databinding.ActivityMainBinding
-import com.kuaihuo.data.count.dbmanager.DBConnectUtils
+import com.kuaihuo.data.count.KuaihuoCountManager
+import com.kuaihuo.data.count.enums.CountTagEnum
+import com.kuaihuo.data.count.ext.getHttpApi
+import com.kuaihuo.data.count.ext.requestMainToIo
+import io.reactivex.Single
+import java.io.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        uiUpdate()
+    }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+    private fun uiUpdate() {
         findViewById<View>(R.id.connect).setOnClickListener {
-            Thread {
-                DBConnectUtils.connectDB()
-                val sql = "INSERT INTO test VALUES(2)"
-                DBConnectUtils.executeSql(sql)
-            }.start()
+            val list = KuaihuoCountManager.buildUploadRecordFiles()
+            if (list.isEmpty()) {
+                KuaihuoCountManager.print("没有可上传的文件")
+                return@setOnClickListener
+            }
+            getHttpApi()
+                .uploadRecordFile(list)
+                .requestMainToIo {
+//                    KuaihuoCountManager.deleteFinishFiles()
+                    KuaihuoCountManager.print("文件上传成功")
+                }
         }
-        findViewById<View>(R.id.close).setOnClickListener {
-            Thread {
-                DBConnectUtils.disconnectDB()
-            }.start()
+        findViewById<Button>(R.id.testAddFile).text =
+            "新增文件(${KuaihuoCountManager.buildUploadRecordFiles().size})"
+        findViewById<View>(R.id.testAddFile).setOnClickListener {
+            val filtPath = KuaihuoCountManager.fileConfig.cacheFileDirPathFinish
+            val name = CountTagEnum.ACTIVITY_JUMP.generateFileName()
+            val f = File(filtPath, name)
+            KuaihuoCountManager.writeLog2File(f, "123872639239279") {
+
+            }
+            KuaihuoCountManager.writeLog2File(f, "abcdalkjlkdfjlksjf") {
+
+            }
+            KuaihuoCountManager.writeLog2File(f, "昆虫记阿李经理看到过加了看设计感了可点击") {
+
+            }
+            uiUpdate()
+        }
+        findViewById<View>(R.id.testDelFile).setOnClickListener {
+            KuaihuoCountManager.deleteFinishFiles()
+            uiUpdate()
+        }
+
+        findViewById<View>(R.id.to_test1).setOnClickListener {
+            startActivity(Intent(this, NewTestActivity::class.java))
+        }
+        findViewById<View>(R.id.to_test2).setOnClickListener {
+            startActivity(Intent(this, NewTestActivity::class.java), Bundle())
+        }
+        findViewById<View>(R.id.to_test3).setOnClickListener {
+            startActivityForResult(Intent(this, NewTestActivity::class.java), 2)
+        }
+        findViewById<View>(R.id.to_test4).setOnClickListener {
+            startActivityForResult(Intent(this, NewTestActivity::class.java), 2, Bundle())
         }
     }
+
 }

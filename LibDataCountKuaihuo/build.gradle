@@ -34,9 +34,26 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    //noinspection LifecycleAnnotationProcessorWithJava8
+    implementation "androidx.lifecycle:lifecycle-common:2.3.1"
 
-    //数据库连接库
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.49'
     //hook相关的库
     api 'io.github.15198184721:AndroidSandHook:1.0'
+    //工具类
+    implementation 'com.blankj:utilcodex:1.23.7'
+    //rxjava库
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+    //下面两个是RxJava 和RxAndroid
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'//转换器，请求结果转换成Model
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'//转换器，请求结果转换成Model
+    implementation('com.squareup.retrofit2:adapter-rxjava2:2.9.0') {//配合Rxjava 使用
+        exclude module: 'rxjava'
+    }
+    implementation 'com.google.code.gson:gson:2.8.6' //gson
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0' //http日志打印
+    //rxjava生命周期库
+    implementation 'com.github.nekocode.rxlifecycle:rxlifecycle:2.0'
+    implementation 'com.github.nekocode.rxlifecycle:rxlifecycle-compact:2.0'
 }

@@ -1,0 +1,5 @@
+
+app :正常的启动。运行demo
+DataCountAppLinkLibApp :用于连接器打包的工具。相当于是启动器
+
+LibDataCountKuaihuo :实际的统计model
