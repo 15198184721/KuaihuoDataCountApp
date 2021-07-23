@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.FileUtils
 import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
@@ -28,12 +29,11 @@ class ActivityJumpCountManager : AbsModelRunHelper() {
 
     override fun startCount() {
         addActivityListener()
-        saveFileFile = File(buildNewSaveFile(getCountTag()))
         startCountHookTask()
         KuaihuoCountManager.print(
             "文件初始化成功：${saveFileFile.absolutePath},文件是否存在：${
                 FileUtils.isFileExists(
-                    saveFileFile!!.absolutePath
+                    saveFileFile.absolutePath
                 )
             }"
         )

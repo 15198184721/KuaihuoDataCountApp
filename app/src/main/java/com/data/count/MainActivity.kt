@@ -23,6 +23,11 @@ class MainActivity : AppCompatActivity() {
         uiUpdate()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        uiUpdate()
+    }
+
     private fun uiUpdate() {
         findViewById<View>(R.id.connect).setOnClickListener {
             val list = KuaihuoCountManager.buildUploadRecordFiles()

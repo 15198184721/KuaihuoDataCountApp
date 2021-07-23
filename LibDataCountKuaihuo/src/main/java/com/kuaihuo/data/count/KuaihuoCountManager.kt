@@ -6,7 +6,6 @@ import android.util.Log
 import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.FileUtils
 import com.kuaihuo.data.count.configs.FileConfig
-import com.kuaihuo.data.count.configs.FileConfig.Companion.RECORD_FILE_MAX_SIZE
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.managers.ActivityJumpCountManager
 import com.kuaihuo.data.count.utils.HttpHelper
@@ -147,7 +146,7 @@ object KuaihuoCountManager {
                 true
             )
             try {
-                if (file.length() >= RECORD_FILE_MAX_SIZE) {
+                if (file.length() >= CountTagEnum.ACTIVITY_JUMP.fileMaxLenght) {
                     val dest =
                         File("${fileConfig.getFinalDirPath()}${FileUtils.getFileName(file)}")
                     FileUtils.moveFile(file, dest)

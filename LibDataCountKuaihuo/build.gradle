@@ -57,3 +57,12 @@ dependencies {
     implementation 'com.github.nekocode.rxlifecycle:rxlifecycle:2.0'
     implementation 'com.github.nekocode.rxlifecycle:rxlifecycle-compact:2.0'
 }
+
+
+ext {
+    PUBLISH_GROUP_ID = "io.github.15198184721"  //申请的mven的GroupId
+    PUBLISH_ARTIFACT_ID = 'KuaihuoDataCount'     //项目名
+    PUBLISH_VERSION = android.defaultConfig.versionName  //版本号
+}
+
+apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"

@@ -7,8 +7,8 @@ import java.io.File
  */
 class FileConfig {
     companion object{
-        /** 记录文件单个文件的最大长度，默认为 0.8MB */
-        const val RECORD_FILE_MAX_SIZE = (0.0003 * 1024 * 1024).toInt()
+        /** 记录完成的日志。待上传日志的整体允许的最大限制:默认 2MB */
+        const val RECORD_WAIT_UPLOAD_FILE_MAX_SIZE = (2 * 1024 * 1024)
     }
 
     /** 缓存的临时文件存储路径。就是还在记录过程中。还没有完成记录的文件保存的路径 */

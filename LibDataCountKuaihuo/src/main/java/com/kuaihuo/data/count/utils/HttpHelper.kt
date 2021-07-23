@@ -1,11 +1,13 @@
 package com.kuaihuo.data.count.utils
 
+import com.blankj.utilcode.util.FileUtils
 import com.google.gson.GsonBuilder
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.api.BaseUrlInfo
 import com.kuaihuo.data.count.api.IDataCountApi
 import com.kuaihuo.data.count.api.factory.NullStringToEmptyAdapterFactory
 import com.kuaihuo.data.count.api.interceptors.HttpLogger
+import com.kuaihuo.data.count.configs.FileConfig.Companion.RECORD_WAIT_UPLOAD_FILE_MAX_SIZE
 import com.kuaihuo.data.count.ext.getHttpApi
 import com.kuaihuo.data.count.ext.requestMainToIo
 import okhttp3.OkHttpClient
@@ -41,7 +43,7 @@ object HttpHelper {
     /**
      * 上传已经完成的文件
      */
-    fun uploadFinalFiles(){
+    fun uploadFinalFiles() {
         val list = KuaihuoCountManager.buildUploadRecordFiles()
         if (list.isEmpty()) {
             KuaihuoCountManager.print("没有可上传的文件")
@@ -49,9 +51,18 @@ object HttpHelper {
         }
         getHttpApi()
             .uploadRecordFile(list)
-            .requestMainToIo {
+            .requestMainToIo({
+                if (FileUtils.getDirLength(KuaihuoCountManager.fileConfig.getFinalDirPath()) >
+                    RECORD_WAIT_UPLOAD_FILE_MAX_SIZE
+                ) {
+                    //待上传日志累计超过了2MB,清空日志。可能清空是由于长期上传失败导致日志积压
+                    KuaihuoCountManager.deleteFinishFiles()
+                    KuaihuoCountManager.print("日志超过最大限制,清除日志")
+                }
+            }, {
+                KuaihuoCountManager.deleteFinishFiles()
                 KuaihuoCountManager.print("日志信息已上传完成")
-            }
+            })
     }
 
     //初始化

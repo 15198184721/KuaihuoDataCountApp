@@ -12,7 +12,11 @@ import java.io.File
 abstract class AbsModelRunHelper {
 
     /** 本次保存的数据保存的恩建路径 */
-    protected lateinit var saveFileFile: File
+    protected var saveFileFile: File = File(
+        KuaihuoCountManager.buildNewSaveFile(
+            this.getCountTag()
+        )
+    )
 
     /**
      * 开始启动方法
