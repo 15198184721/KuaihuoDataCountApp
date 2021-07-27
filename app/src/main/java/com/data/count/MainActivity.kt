@@ -1,17 +1,15 @@
 package com.data.count
 
-import android.app.Fragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.data.count.databinding.ActivityMainBinding
+import com.data.count.bean.TestABean
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.ext.getHttpApi
 import com.kuaihuo.data.count.ext.requestMainToIo
-import io.reactivex.Single
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun uiUpdate() {
+        findViewById<View>(R.id.test_user_login).setOnClickListener {
+            loginSuccessCount(TestABean())
+        }
         findViewById<View>(R.id.connect).setOnClickListener {
             val list = KuaihuoCountManager.buildUploadRecordFiles()
             if (list.isEmpty()) {
@@ -76,6 +77,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.to_test4).setOnClickListener {
             startActivityForResult(Intent(this, NewTestActivity::class.java), 2, Bundle())
         }
+    }
+
+    //提供给数据统计使用的
+    fun loginSuccessCount(info: TestABean){
+
     }
 
 }

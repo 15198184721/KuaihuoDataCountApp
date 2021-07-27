@@ -8,6 +8,6 @@ object BaseUrlInfo {
     /** 基础地质 */
 //    val BASE_URL = "http://123.57.255.137:8080/kuaihuoext/"
     /** 基础地质(测试本机) */
-    val BASE_URL = "http://192.168.0.24:8080/"
+    val BASE_URL = "http://192.168.0.40:8080/"
 
 }

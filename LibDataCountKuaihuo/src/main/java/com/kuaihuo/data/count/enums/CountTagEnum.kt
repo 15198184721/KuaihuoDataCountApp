@@ -10,17 +10,22 @@ enum class CountTagEnum {
     ACTIVITY_JUMP(
         0,
         "ACTIVITY_JUP",
-        //0.005 = 默认5k(大概跳转50次页面提交一次统计)
-        (0.005 * 1024 * 1024).toInt()
+        (0.005 * 1024 * 1024).toInt() //0.005 = 默认5k(大概跳转50次页面提交一次统计)
+    ),
+    /** 用户登录统计(无文件长度,实时上报) */
+    USER_LOGIN(
+        0,
+        "USER_LOGIN"
     )
     ;
 
     val typeName: String
     val code: Int
-    /** 此分类的文件最大允许的长度 */
+
+    /** 此分类的文件最大允许的长度,如果为0，表示实时上报 */
     val fileMaxLenght: Int
 
-    constructor(code: Int, name: String, fileMaxLenght: Int) {
+    constructor(code: Int, name: String, fileMaxLenght: Int = 0) {
         this.typeName = name
         this.code = code
         this.fileMaxLenght = fileMaxLenght

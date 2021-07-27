@@ -8,6 +8,7 @@ import com.blankj.utilcode.util.FileUtils
 import com.kuaihuo.data.count.configs.FileConfig
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.managers.ActivityJumpCountManager
+import com.kuaihuo.data.count.managers.UserLoginCountManager
 import com.kuaihuo.data.count.utils.HttpHelper
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -28,6 +29,7 @@ object KuaihuoCountManager {
     //添加需要统计的所有model的工具。必须在此添加到初始化列表。否则无法初始化
     init {
         modelRunHelperObjs.add(ActivityJumpCountManager()) //添加页面跳转统计工具
+        modelRunHelperObjs.add(UserLoginCountManager()) //添加用户登录统计工具
     }
 
     //全局上下文
@@ -50,6 +52,7 @@ object KuaihuoCountManager {
 //            runModelManager(scanClzz(appCcontext, runHelperPackage))
             //采用直接调用。反射太慢了
             modelRunHelperObjs.forEach {
+                it.initFile()
                 it.startCount()
             }
             modelRunHelperObjs.clear()

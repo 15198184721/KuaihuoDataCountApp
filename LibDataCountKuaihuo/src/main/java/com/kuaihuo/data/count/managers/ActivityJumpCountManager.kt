@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
-import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.FileUtils
 import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
@@ -14,8 +13,6 @@ import com.kuaihuo.data.count.AbsModelRunHelper
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.KuaihuoCountManager.buildNewSaveFile
 import com.kuaihuo.data.count.enums.CountTagEnum
-import com.kuaihuo.data.count.ext.requestMainToIo
-import io.reactivex.Observable
 import org.json.JSONObject
 import java.io.File
 
@@ -31,9 +28,9 @@ class ActivityJumpCountManager : AbsModelRunHelper() {
         addActivityListener()
         startCountHookTask()
         KuaihuoCountManager.print(
-            "文件初始化成功：${saveFileFile.absolutePath},文件是否存在：${
+            "文件初始化成功：${saveFile.absolutePath},文件是否存在：${
                 FileUtils.isFileExists(
-                    saveFileFile.absolutePath
+                    saveFile.absolutePath
                 )
             }"
         )
@@ -44,19 +41,19 @@ class ActivityJumpCountManager : AbsModelRunHelper() {
     }
 
     override fun getTemSaveFile(): File? {
-        return saveFileFile
+        return saveFile
     }
 
     override fun resetTemSaveFile() {
-        if (saveFileFile.exists()) {
+        if (saveFile.exists()) {
             //文件存在。删除此文件
-            saveFileFile.delete()
+            saveFile.delete()
         }
-        saveFileFile = File(buildNewSaveFile(CountTagEnum.ACTIVITY_JUMP))
+        saveFile = File(buildNewSaveFile(CountTagEnum.ACTIVITY_JUMP))
         KuaihuoCountManager.print(
-            "文件已重置：${saveFileFile.absolutePath},文件是否存在：${
+            "文件已重置：${saveFile.absolutePath},文件是否存在：${
                 FileUtils.isFileExists(
-                    saveFileFile.absolutePath
+                    saveFile.absolutePath
                 )
             }"
         )

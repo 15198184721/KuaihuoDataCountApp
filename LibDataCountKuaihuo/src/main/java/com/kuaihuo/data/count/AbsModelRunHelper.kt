@@ -8,15 +8,13 @@ import java.io.File
 
 /**
  * 模块统计管理的运行启动辅助类
+ * 注：
+ * 此类是用作需要写缓存文件上传方式的类。如果是实时的请继承:[AbsModelRealRunHelper]
  */
 abstract class AbsModelRunHelper {
 
     /** 本次保存的数据保存的恩建路径 */
-    protected var saveFileFile: File = File(
-        KuaihuoCountManager.buildNewSaveFile(
-            this.getCountTag()
-        )
-    )
+    protected lateinit var saveFile: File;
 
     /**
      * 开始启动方法
@@ -51,6 +49,19 @@ abstract class AbsModelRunHelper {
     abstract fun buildRecordWriteContent(param: HookMethodCallParams?): String?
 
     /**
+     * 初始化保存的文件
+     */
+    open fun initFile() {
+        if (!this::saveFile.isInitialized) {
+            saveFile = File(
+                KuaihuoCountManager.buildNewSaveFile(
+                    this.getCountTag()
+                )
+            )
+        }
+    }
+
+    /**
      * 写入记录内容到文件中
      * @param content String
      */
@@ -69,7 +80,7 @@ abstract class AbsModelRunHelper {
                 }
             }
             .requestMainToIo(err = {
-                KuaihuoCountManager.print("写入文件[${saveFileFile.absolutePath}]出现错误:$it")
+                KuaihuoCountManager.print("写入文件[${saveFile.absolutePath}]出现错误:$it")
             })
     }
 }
