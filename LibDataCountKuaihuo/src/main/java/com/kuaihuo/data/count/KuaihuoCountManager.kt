@@ -8,6 +8,7 @@ import com.blankj.utilcode.util.FileUtils
 import com.kuaihuo.data.count.configs.FileConfig
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.managers.ActivityJumpCountManager
+import com.kuaihuo.data.count.managers.ActivityUserStayCountManager
 import com.kuaihuo.data.count.managers.UserLoginCountManager
 import com.kuaihuo.data.count.utils.HttpHelper
 import okhttp3.MediaType
@@ -30,6 +31,7 @@ object KuaihuoCountManager {
     init {
         modelRunHelperObjs.add(ActivityJumpCountManager()) //添加页面跳转统计工具
         modelRunHelperObjs.add(UserLoginCountManager()) //添加用户登录统计工具
+        modelRunHelperObjs.add(ActivityUserStayCountManager()) //添加用户在每个页面停留时间统计工具
     }
 
     //全局上下文
@@ -62,6 +64,16 @@ object KuaihuoCountManager {
     }
 
     /**
+     * 输出统计的日志信息
+     * @param msg String
+     */
+    fun print(msg: String) {
+        if (BuildConfig.DEBUG) {
+            Log.e(TAG, msg)
+        }
+    }
+
+    /**
      * 生成新的存储文件,如果存在返回原文件。不存在生成新的当前类型的临时存储文件
      * @return String
      */
@@ -82,14 +94,6 @@ object KuaihuoCountManager {
             FileUtils.createOrExistsFile(newFilePaht)
         }
         return newFilePaht
-    }
-
-    /**
-     * 输出统计的日志信息
-     * @param msg String
-     */
-    fun print(msg: String) {
-        Log.e(TAG, msg)
     }
 
     /**
@@ -116,6 +120,28 @@ object KuaihuoCountManager {
     }
 
     /**
+     * 强制将现有临时文件归档并重新生成一个临时文件
+     * @param typeTag 类型
+     * @param file 文件
+     * @return File
+     */
+    fun resetBuildNewTemFile(typeTag: CountTagEnum, file: File): File? {
+        return try {
+            val dest =
+                File("${fileConfig.getFinalDirPath()}${FileUtils.getFileName(file)}")
+            FileUtils.moveFile(file, dest)
+            file.delete()
+            //生成新文件
+            File(buildNewSaveFile(typeTag))
+        } catch (e: Exception) {
+            null
+        } finally {
+            //上传已经完成的文件到服务器
+            HttpHelper.uploadFinalFiles()
+        }
+    }
+
+    /**
      * 将数据写入指定文件
      * @param file 写入的文件
      * @param appendStr 追加的内容
@@ -126,6 +152,7 @@ object KuaihuoCountManager {
      */
     @Synchronized
     fun writeLog2File(
+        typeTag: CountTagEnum,
         file: File,
         appendStr: String,
         finishCreateNewTemFileListener: () -> Unit
@@ -149,7 +176,7 @@ object KuaihuoCountManager {
                 true
             )
             try {
-                if (file.length() >= CountTagEnum.ACTIVITY_JUMP.fileMaxLenght) {
+                if (file.length() >= typeTag.fileMaxLenght) {
                     val dest =
                         File("${fileConfig.getFinalDirPath()}${FileUtils.getFileName(file)}")
                     FileUtils.moveFile(file, dest)

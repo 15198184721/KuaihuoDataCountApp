@@ -25,7 +25,6 @@ import java.io.File
 class ActivityJumpCountManager : AbsModelRunHelper() {
 
     override fun startCount() {
-        addActivityListener()
         startCountHookTask()
         KuaihuoCountManager.print(
             "文件初始化成功：${saveFile.absolutePath},文件是否存在：${
@@ -49,7 +48,7 @@ class ActivityJumpCountManager : AbsModelRunHelper() {
             //文件存在。删除此文件
             saveFile.delete()
         }
-        saveFile = File(buildNewSaveFile(CountTagEnum.ACTIVITY_JUMP))
+        saveFile = File(buildNewSaveFile(getCountTag()))
         KuaihuoCountManager.print(
             "文件已重置：${saveFile.absolutePath},文件是否存在：${
                 FileUtils.isFileExists(
@@ -127,38 +126,5 @@ class ActivityJumpCountManager : AbsModelRunHelper() {
 //                arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), call
 //            )
 //        )
-    }
-
-    //添加页面生命周期监听
-    private fun addActivityListener() {
-        if (KuaihuoCountManager.appCcontext is Application) {
-            (KuaihuoCountManager.appCcontext as Application).registerActivityLifecycleCallbacks(
-                object :
-                    Application.ActivityLifecycleCallbacks {
-                    override fun onActivityCreated(
-                        activity: Activity,
-                        savedInstanceState: Bundle?
-                    ) {
-                    }
-
-                    override fun onActivityStarted(activity: Activity) {
-                    }
-
-                    override fun onActivityResumed(activity: Activity) {
-                    }
-
-                    override fun onActivityPaused(activity: Activity) {
-                    }
-
-                    override fun onActivityStopped(activity: Activity) {
-                    }
-
-                    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-                    }
-
-                    override fun onActivityDestroyed(activity: Activity) {
-                    }
-                })
-        }
     }
 }

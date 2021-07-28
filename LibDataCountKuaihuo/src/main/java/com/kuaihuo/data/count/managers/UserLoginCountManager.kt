@@ -1,11 +1,5 @@
 package com.kuaihuo.data.count.managers
 
-import android.app.Activity
-import android.app.Application
-import android.content.Intent
-import android.os.Bundle
-import com.blankj.utilcode.util.FileIOUtils
-import com.blankj.utilcode.util.FileUtils
 import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
 import com.chat_hook.HookMethodHelper
@@ -21,15 +15,30 @@ import com.kuaihuo.data.count.utils.HttpHelper
 import org.json.JSONObject
 
 /**
- * 用户登录统计管理器,统计用户的登录次数
+ * 用户登录统计管理器,统计用户的登录
  * 作为管理器需要满足条件：
  *  1、必须有无参构造函数
  *  2、必须继承[AbsModelRunHelper]接口。因为启动方式为扫描
  */
 class UserLoginCountManager : AbsModelRealRunHelper() {
+
+    companion object {
+        /** 记录登录的用户id，如果为空或者空串表示未登录状态 */
+        private var loginUserId: String? = null
+
+        /**
+         * 获取登录用户的ID
+         * @return null 或者 "" 表示未登录，否则表示已登录
+         */
+        fun getLoginUserId(): String? {
+            return loginUserId
+        }
+    }
+
+    /*------------------------ 登录成功的拦截 ----------------------------*/
     //登录成功的拦截class
-    private val hookUserLoginClass = "com.uni.kuaihuo.di.mvvm.view.MainActivity"
-//    private val hookUserLoginClass = "com.data.count.MainActivity"
+    private val hookUserLoginClass = "com.uni.kuaihuo.lib.repository.data.count.CountInfoUtils"
+//    private val hookUserLoginClass = "com.data.count.utisl.CountInfoUtils"
 
     //登录成功的方法参数拦截
 //    private val hookUserLoginMethodParamsArray =
@@ -47,8 +56,24 @@ class UserLoginCountManager : AbsModelRealRunHelper() {
         }
     }
 
+    /*------------------------ 退出登录的拦截----------------------------*/
+    //登录成功的拦截class
+    private val hookUserLoginOutClass = "com.uni.kuaihuo.lib.repository.data.count.CountInfoUtils"
+//    private val hookUserLoginOutClass = "com.data.count.utisl.CountInfoUtils"
+
+    //退出登录的拦截方法名称
+    private val hookUserLoginOutMethod = "loginOutCount"
+
+    //退出登录的拦截回调
+    val loginOut = object : HookMethodCall {
+        override fun afterHookedMethod(param: HookMethodCallParams?) {
+            exitLoginHookRun()
+        }
+    }
+
     override fun startCount() {
         startLoginSuccessHookTask()
+        startLoginOutHookTask()
     }
 
     override fun getCountTag(): CountTagEnum {
@@ -68,11 +93,11 @@ class UserLoginCountManager : AbsModelRealRunHelper() {
         }
     }
 
-    //提交请求
+    //提交登录成功的请求
+    @Synchronized
     private fun requestJson(json: String?) {
         try {
             if (json?.isNotEmpty() == true) {
-                val req = ""
                 val jsonObj = JSONObject(json)
                 val name: String? = if (jsonObj.has("nickName")) {
                     jsonObj.getString("nickName")
@@ -89,12 +114,19 @@ class UserLoginCountManager : AbsModelRealRunHelper() {
                     name,
                     gender
                 )
+                loginUserId = user.userId
                 HttpHelper.getHttpApi().setUserLoginInfo(user)
                     .requestMainToIo()
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    //退出登录的事件发生了，需要做响应的操作
+    @Synchronized
+    private fun exitLoginHookRun() {
+        loginUserId = null
     }
 
     //登录成功的任务
@@ -109,6 +141,22 @@ class UserLoginCountManager : AbsModelRealRunHelper() {
                 HookMethodParams(
                     czz, hookUserLoginMethod,
                     paramsClassArray, loginSuccess
+                )
+            )
+        } catch (e: Exception) {
+            KuaihuoCountManager.print("执行用户登录统计失败:$e")
+        }
+    }
+
+    //退出登录的任务
+    private fun startLoginOutHookTask() {
+        try {
+            //hook loginOutCount方法来拦截登录成功
+            val czz = Class.forName(hookUserLoginOutClass)
+            HookMethodHelper.addHookMethod(
+                HookMethodParams(
+                    czz, hookUserLoginOutMethod,
+                    null, loginOut
                 )
             )
         } catch (e: Exception) {

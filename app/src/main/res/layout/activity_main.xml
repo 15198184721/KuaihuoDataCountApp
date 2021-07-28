@@ -11,13 +11,6 @@
         android:orientation="vertical"
         tools:context=".MainActivity">
         <Button
-            android:id="@+id/test_user_login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="测试用户登录"/>
-
-
-        <Button
             android:id="@+id/to_test1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,6 +38,17 @@
             android:id="@+id/connect_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/test_user_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="用户成功登录测试"/>
+        <Button
+            android:id="@+id/test_user_login_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="退出登录测试"/>
 
         <Button
             android:id="@+id/connect"

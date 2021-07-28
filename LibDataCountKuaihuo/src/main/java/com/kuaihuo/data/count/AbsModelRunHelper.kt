@@ -72,7 +72,7 @@ abstract class AbsModelRunHelper {
         Observable.just(getTemSaveFile())
             .doOnNext {
                 if (it != null) {
-                    KuaihuoCountManager.writeLog2File(it, content) {
+                    KuaihuoCountManager.writeLog2File(getCountTag(),it, content) {
                         resetTemSaveFile()
                     }
                 } else {
