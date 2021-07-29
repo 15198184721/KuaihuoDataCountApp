@@ -9,8 +9,6 @@ import com.data.count.bean.TestABean
 import com.data.count.utisl.CountInfoUtils
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.enums.CountTagEnum
-import com.kuaihuo.data.count.ext.getHttpApi
-import com.kuaihuo.data.count.ext.requestMainToIo
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
@@ -43,12 +41,12 @@ class MainActivity : AppCompatActivity() {
                 KuaihuoCountManager.print("没有可上传的文件")
                 return@setOnClickListener
             }
-            getHttpApi()
-                .uploadRecordFile(list)
-                .requestMainToIo {
-//                    KuaihuoCountManager.deleteFinishFiles()
-                    KuaihuoCountManager.print("文件上传成功")
-                }
+//            getHttpApi()
+//                .uploadRecordFile(list)
+//                .requestMainToIo {
+////                    KuaihuoCountManager.deleteFinishFiles()
+//                    KuaihuoCountManager.print("文件上传成功")
+//                }
         }
         findViewById<Button>(R.id.testAddFile).text =
             "新增文件(${KuaihuoCountManager.buildUploadRecordFiles().size})"

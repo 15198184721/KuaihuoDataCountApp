@@ -22,7 +22,7 @@ import java.io.File
  *  1、必须有无参构造函数
  *  2、必须继承[AbsModelRunHelper]接口。因为启动方式为扫描
  */
-class ActivityJumpCountManager : AbsModelRunHelper() {
+internal class ActivityJumpCountManager : AbsModelRunHelper() {
 
     override fun startCount() {
         startCountHookTask()

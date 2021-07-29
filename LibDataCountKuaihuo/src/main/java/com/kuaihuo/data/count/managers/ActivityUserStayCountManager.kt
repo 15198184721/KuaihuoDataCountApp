@@ -19,7 +19,7 @@ import java.util.*
  *  1、必须有无参构造函数
  *  2、必须继承[AbsModelRunHelper]接口。因为启动方式为扫描
  */
-class ActivityUserStayCountManager : AbsModelRunHelper() {
+internal class ActivityUserStayCountManager : AbsModelRunHelper() {
 
     //记录临每个页面的起止时间的标记
     private val temRecordMap: MutableMap<String, Long?> =

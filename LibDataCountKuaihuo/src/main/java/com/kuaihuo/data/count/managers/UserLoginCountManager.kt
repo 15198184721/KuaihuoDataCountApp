@@ -20,7 +20,7 @@ import org.json.JSONObject
  *  1、必须有无参构造函数
  *  2、必须继承[AbsModelRunHelper]接口。因为启动方式为扫描
  */
-class UserLoginCountManager : AbsModelRealRunHelper() {
+internal class UserLoginCountManager : AbsModelRealRunHelper() {
 
     companion object {
         /** 记录登录的用户id，如果为空或者空串表示未登录状态 */

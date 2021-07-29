@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.data.count.databinding.ActivityMainBinding
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.enums.CountTagEnum
-import com.kuaihuo.data.count.ext.getHttpApi
-import com.kuaihuo.data.count.ext.requestMainToIo
 import io.reactivex.Single
 import java.io.*
 
