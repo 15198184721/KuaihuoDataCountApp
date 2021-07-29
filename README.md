@@ -15,6 +15,6 @@
 ### 1.1.4
 1、修复初始化时候可能是app的context.applicationContext 为空的bug
 
-### 1.1.4
+### 1.1.5
 1、修改页面停留无法统计的bug
 2、修改用户跳转。如果会用Context.startActivity() 无法统计的问题
