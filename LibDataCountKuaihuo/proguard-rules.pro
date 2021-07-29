@@ -19,3 +19,24 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class *.R -keepclasseswithmembers class *.R$* { public static <fields>;}
+# 不混淆 KuaihuoCountManager方法
+-keep class com.kuaihuo.data.count.KuaihuoCountManager{
+    <methods>;
+}
+ #不要混淆MySuperBean所有子类的属性与方法
+#-keepclasseswithmembers class * extends MySuperBean{
+#    <fields>;
+#    <methods>;
+#}
+-keep class com.kuaihuo.data.count.enums.*
+-keep class com.kuaihuo.data.count.ext.ActivityExtKt{
+    <methods>;
+}
+-keep class com.kuaihuo.data.count.ext.ObservableExtKt{
+    <methods>;
+}
+-keep class com.kuaihuo.data.count.ext.FragmentExtKt{
+    <methods>;
+}
