@@ -11,3 +11,6 @@
 
 ### 1.1.3
 1、去掉了混淆和新增一些内部限定
+
+### 1.1.4
+1、修复初始化时候可能是app的context.applicationContext 为空的bug
