@@ -3,6 +3,7 @@ package com.kuaihuo.data.count.managers
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import com.blankj.utilcode.util.FileUtils
 import com.chat_hook.HookMethodCallParams
 import com.kuaihuo.data.count.AbsModelRunHelper
@@ -125,36 +126,51 @@ internal class ActivityUserStayCountManager : AbsModelRunHelper() {
 
     //添加页面生命周期监听
     private fun addActivityListener() {
+        val actLifecycleListen = object :
+            Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(
+                activity: Activity,
+                savedInstanceState: Bundle?
+            ) {
+            }
+
+            override fun onActivityStarted(activity: Activity) {
+                buildRecordData(activity, 1)
+            }
+
+            override fun onActivityResumed(activity: Activity) {
+            }
+
+            override fun onActivityPaused(activity: Activity) {
+            }
+
+            override fun onActivityStopped(activity: Activity) {
+                buildRecordData(activity, 4)
+            }
+
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+            }
+
+            override fun onActivityDestroyed(activity: Activity) {
+            }
+        }
         if (KuaihuoCountManager.appCcontext is Application) {
             (KuaihuoCountManager.appCcontext as Application).registerActivityLifecycleCallbacks(
-                object :
-                    Application.ActivityLifecycleCallbacks {
-                    override fun onActivityCreated(
-                        activity: Activity,
-                        savedInstanceState: Bundle?
-                    ) {
-                    }
-
-                    override fun onActivityStarted(activity: Activity) {
-                        buildRecordData(activity, 1)
-                    }
-
-                    override fun onActivityResumed(activity: Activity) {
-                    }
-
-                    override fun onActivityPaused(activity: Activity) {
-                    }
-
-                    override fun onActivityStopped(activity: Activity) {
-                        buildRecordData(activity, 4)
-                    }
-
-                    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-                    }
-
-                    override fun onActivityDestroyed(activity: Activity) {
-                    }
-                })
+                actLifecycleListen
+            )
+        } else {
+            if (KuaihuoCountManager.appCcontext.applicationContext != null &&
+                KuaihuoCountManager.appCcontext.applicationContext is Application
+            ) {
+                (KuaihuoCountManager.appCcontext.applicationContext as Application).registerActivityLifecycleCallbacks(
+                    actLifecycleListen
+                )
+            } else {
+                Log.e(
+                    KuaihuoCountManager.TAG,
+                    "add manager error:context is not application,not found Application context"
+                )
+            }
         }
     }
 }

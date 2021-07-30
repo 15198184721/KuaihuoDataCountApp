@@ -1,7 +1,10 @@
 package com.kuaihuo.data.count.managers
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.Application
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import com.blankj.utilcode.util.FileUtils
@@ -63,21 +66,33 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
             if (param == null) {
                 return null
             }
-            var thisActivity: String? = param.getThisObject()?.javaClass?.name
+            if (param.getThisObject() == null) {
+                return null
+            }
+            val thisActivity: String? = if (param.getThisObject() is Application) {
+                val am =
+                    (param.getThisObject() as? Application)?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                am.getRunningTasks(1)[0].topActivity?.className
+            } else {
+                param.getThisObject()?.javaClass?.name
+            }
+            if (thisActivity == null) {
+                return null //无法确定跳转源。放弃记录
+            }
             var toActivity: String? = null
             param.getArges()?.forEach {
                 if (it != null && Intent::class.java.isAssignableFrom(it.javaClass)) {
                     toActivity = (it as Intent).component?.className
                 }
             }
-            if (thisActivity == null || toActivity == null) {
+            if (toActivity == null) {
                 return null
             }
             val json = JSONObject()
             json.put("thisActivity", thisActivity)
             json.put("toActivity", toActivity)
             return json.toString()
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
             KuaihuoCountManager.print("记录内容构建失败:$e")
             return null
@@ -86,45 +101,37 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
 
     //开始统计任务
     private fun startCountHookTask() {
-        val startActivity = object : HookMethodCall {
+        val startActivityCall = object : HookMethodCall {
             override fun afterHookedMethod(param: HookMethodCallParams?) {
+            }
+
+            override fun beforeHookedMethod(param: HookMethodCallParams?) {
+                //拦截在方法调用之前
                 writeLog2File(buildRecordWriteContent(param))
             }
         }
         //hook startActivity
-//        val startActivity = "startActivity"
-//        HookMethodHelper.addHookMethod(
-//            HookMethodParams(
-//                ContextWrapper::class.java, startActivity,
-//                arrayOf(Intent::class.java), call
-//            )
-//        )
-//        HookMethodHelper.addHookMethod(
-//            HookMethodParams(
-//                ContextWrapper::class.java, startActivity,
-//                arrayOf(Intent::class.java, Bundle::class.java), call
-//            )
-//        )
+        val startActivityMethodName = "startActivity"
+        HookMethodHelper.addHookMethod(
+            HookMethodParams(
+                ContextWrapper::class.java, startActivityMethodName,
+                arrayOf(Intent::class.java), startActivityCall
+            )
+        )
+        HookMethodHelper.addHookMethod(
+            HookMethodParams(
+                ContextWrapper::class.java, startActivityMethodName,
+                arrayOf(Intent::class.java, Bundle::class.java), startActivityCall
+            )
+        )
         //hook startActivityForResult
-        val startActivityForResult = "startActivityForResult"
+        val startActivityForResultMethodName = "startActivityForResult"
         //暂时只记录Activity跳转方法引起的页面跳转
         HookMethodHelper.addHookMethod(
             HookMethodParams(
-                Activity::class.java, startActivityForResult,
-                arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), startActivity
+                Activity::class.java, startActivityForResultMethodName,
+                arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), startActivityCall
             )
         )
-//        HookMethodHelper.addHookMethod(
-//            HookMethodParams(
-//                ContextWrapper::class.java, startActivityForResult,
-//                arrayOf(Intent::class.java, Int::class.java), call
-//            )
-//        )
-//        HookMethodHelper.addHookMethod(
-//            HookMethodParams(
-//                ContextWrapper::class.java, startActivityForResult,
-//                arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), call
-//            )
-//        )
     }
 }

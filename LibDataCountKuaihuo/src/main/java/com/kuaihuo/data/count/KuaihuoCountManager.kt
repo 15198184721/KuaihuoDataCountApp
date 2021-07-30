@@ -1,6 +1,8 @@
 package com.kuaihuo.data.count
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.blankj.utilcode.util.FileIOUtils
@@ -22,7 +24,7 @@ import java.io.File
  */
 @SuppressLint("StaticFieldLeak")
 object KuaihuoCountManager {
-    private val TAG = "count"
+    val TAG = "count"
 
     //model的运行helper工具集合。需要初始化的模块集合
     private val modelRunHelperObjs = mutableListOf<AbsModelRunHelper>()
@@ -44,9 +46,9 @@ object KuaihuoCountManager {
      * 初始化方法。启动统计
      * @param context Context
      */
-    fun initCount(context: Context) {
+    fun initCount(context: Application) {
         try {
-            appCcontext = context.applicationContext
+            appCcontext = context
             initFilePath() //初始化文件路径
             //ActivityJumpCountManager.startCount()  //调用页面的调换路径统计
 

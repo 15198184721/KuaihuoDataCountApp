@@ -48,7 +48,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation project(':LibDataCountKuaihuo')
     // LibDataCountKuaihuo 生成的库在maven上传的库。导入测试
-//    implementation 'io.github.15198184721:KuaihuoDataCount:1.1.2'
+//    implementation 'io.github.15198184721:KuaihuoDataCount:1.1.4'
     //rxjava库
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
 }

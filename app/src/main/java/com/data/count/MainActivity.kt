@@ -58,10 +58,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.to_test1).setOnClickListener {
-            startActivity(Intent(this, NewTestActivity::class.java))
+            this.application.startActivity(
+                Intent(this, NewTestActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
         }
         findViewById<View>(R.id.to_test2).setOnClickListener {
-            startActivity(Intent(this, NewTestActivity::class.java), Bundle())
+            this.application.startActivity(
+                Intent(this, NewTestActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), Bundle()
+            )
         }
         findViewById<View>(R.id.to_test3).setOnClickListener {
             startActivityForResult(Intent(this, NewTestActivity::class.java), 2)
