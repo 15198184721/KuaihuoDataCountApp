@@ -1,8 +1,11 @@
 package com.kuaihuo.data.count.api
 
 import com.kuaihuo.data.count.api.req.UserLoginInfoReq
+import com.kuaihuo.data.count.api.resp.AppGeneralConfigResp
 import com.kuaihuo.data.count.api.resp.UserCountResp
 import io.reactivex.Observable
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.http.*
 
 /**
@@ -25,4 +28,22 @@ interface IDataCountApi : IBaseDataCountApi {
      */
     @POST("appUserCount/setUserLoginInfo")
     fun setUserLoginInfo(@Body req: UserLoginInfoReq): Observable<BaseResp<Int>>
+
+
+    /******************** model app的通用配置 API ********************/
+
+    /**
+     * 提交用户登录统计信息
+     */
+    @POST("appConfig/getAppConfig")
+    fun getAppConfig(): Observable<BaseResp<MutableList<AppGeneralConfigResp>>>
+
+
+    /******************** model 其他的 API ********************/
+
+    /**
+     * 根据自己ip确定大致位置
+     */
+    @POST("https://pv.sohu.com/cityjson")
+    fun getFormIp2Addr(): Observable<ResponseBody>
 }

@@ -7,11 +7,13 @@ import android.content.Context
 import android.util.Log
 import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.FileUtils
+import com.kuaihuo.data.count.beans.IpQueryAddrss
 import com.kuaihuo.data.count.configs.FileConfig
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.managers.ActivityJumpCountManager
 import com.kuaihuo.data.count.managers.ActivityUserStayCountManager
 import com.kuaihuo.data.count.managers.UserLoginCountManager
+import com.kuaihuo.data.count.managers.downs.AppGeneralConfigManager
 import com.kuaihuo.data.count.utils.HttpHelper
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -34,6 +36,7 @@ object KuaihuoCountManager {
         modelRunHelperObjs.add(ActivityJumpCountManager()) //添加页面跳转统计工具
         modelRunHelperObjs.add(UserLoginCountManager()) //添加用户登录统计工具
         modelRunHelperObjs.add(ActivityUserStayCountManager()) //添加用户在每个页面停留时间统计工具
+        //只是获取数据的管理类
     }
 
     //全局上下文
@@ -41,6 +44,8 @@ object KuaihuoCountManager {
 
     //路径配置
     val fileConfig: FileConfig = FileConfig()
+    //通过IP查询得到的地址信息(大概地址，省市级)
+    private var addressInfo:IpQueryAddrss? = null
 
     /**
      * 初始化方法。启动统计
@@ -63,6 +68,24 @@ object KuaihuoCountManager {
         } catch (e: Exception) {
             print("初始化出错数据统计出错:$e")
         }
+    }
+
+    /**
+     * 依赖地址信息的相关配置。再次此方法中启动
+     * @param add 地址信息
+     */
+    fun setAddress(add:IpQueryAddrss){
+        this.addressInfo = add
+        //依赖地址信息的。再次方法中启动
+        AppGeneralConfigManager().startCount()
+    }
+
+    /**
+     * 获取地址信息
+     * @return IpQueryAddrss?
+     */
+    fun getAddress():IpQueryAddrss?{
+        return addressInfo
     }
 
     /**

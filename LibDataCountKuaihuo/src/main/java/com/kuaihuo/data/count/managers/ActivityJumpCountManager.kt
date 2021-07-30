@@ -12,12 +12,18 @@ import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
 import com.chat_hook.HookMethodHelper
 import com.chat_hook.HookMethodParams
+import com.google.gson.Gson
 import com.kuaihuo.data.count.AbsModelRunHelper
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.KuaihuoCountManager.buildNewSaveFile
+import com.kuaihuo.data.count.api.IDataCountApi
+import com.kuaihuo.data.count.beans.IpQueryAddrss
 import com.kuaihuo.data.count.enums.CountTagEnum
+import com.kuaihuo.data.count.ext.requestMainToIo
+import com.kuaihuo.data.count.utils.HttpHelper
 import org.json.JSONObject
 import java.io.File
+import java.nio.charset.Charset
 
 /**
  * 页面的路径跳转统计的模块管理器
@@ -103,6 +109,8 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
     private fun startCountHookTask() {
         val startActivityCall = object : HookMethodCall {
             override fun afterHookedMethod(param: HookMethodCallParams?) {
+                //没打开一次页面。检查一次地址查询是否成功，不成功再次查询
+                requestIpQueryAddress()
             }
 
             override fun beforeHookedMethod(param: HookMethodCallParams?) {
@@ -133,5 +141,33 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
                 arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), startActivityCall
             )
         )
+    }
+
+    private var isQueryIp2AddrLoading = false
+    private fun requestIpQueryAddress() {
+        if (isQueryIp2AddrLoading) {
+            return
+        }
+        isQueryIp2AddrLoading = true
+        HttpHelper.getHttpApi().getFormIp2Addr()
+            .requestMainToIo({
+                isQueryIp2AddrLoading = false
+            }, {
+                buildIpQueryAddress(String(it.bytes(), Charset.forName("GBK")))
+            })
+    }
+
+    private fun buildIpQueryAddress(json: String) {
+        try {
+            if (KuaihuoCountManager.getAddress() != null) {
+                return
+            }
+            val newJson = json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1)
+            KuaihuoCountManager.setAddress(Gson().fromJson(newJson, IpQueryAddrss::class.java))
+        } catch (e: Exception) {
+            //出错重置，为可请求状态
+            isQueryIp2AddrLoading = false
+            e.printStackTrace()
+        }
     }
 }

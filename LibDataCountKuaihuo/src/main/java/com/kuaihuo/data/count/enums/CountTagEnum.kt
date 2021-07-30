@@ -6,6 +6,11 @@ import java.util.*
  * 统计的标志,就是统计的类型,和后台支持的类型一致
  */
 enum class CountTagEnum {
+    /** 无统计类型。表示是一个非统计的类型。可能是一个配置或者其他不具备上传功能的hook模块，只有获取功能的模块 */
+    NONE(
+        -1,
+        "NONE"
+    ),
     /** 页面跳转的类型 */
     ACTIVITY_JUMP(
         0,
