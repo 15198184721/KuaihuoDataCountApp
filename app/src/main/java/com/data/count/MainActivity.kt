@@ -10,6 +10,7 @@ import com.data.count.utisl.CountInfoUtils
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.enums.CountTagEnum
 import java.io.*
+import java.net.HttpURLConnection
 
 class MainActivity : AppCompatActivity() {
 

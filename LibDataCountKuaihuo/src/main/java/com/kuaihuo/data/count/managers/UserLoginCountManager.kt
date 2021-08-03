@@ -112,7 +112,8 @@ internal class UserLoginCountManager : AbsModelRealRunHelper() {
                 val user = UserLoginInfoReq(
                     jsonObj.getString("id"),
                     name,
-                    gender
+                    gender,
+                    loginAddrss = KuaihuoCountManager.getAddress()?.cname
                 )
                 loginUserId = user.userId
                 HttpHelper.getHttpApi().setUserLoginInfo(user)

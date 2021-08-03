@@ -109,8 +109,8 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
     private fun startCountHookTask() {
         val startActivityCall = object : HookMethodCall {
             override fun afterHookedMethod(param: HookMethodCallParams?) {
-                //没打开一次页面。检查一次地址查询是否成功，不成功再次查询
-                requestIpQueryAddress()
+                //没打开一次页面。检查一次地址查询是否成功，不成功再次查询，这个主要是为了容错
+                KuaihuoCountManager.requestIpQueryAddress()
             }
 
             override fun beforeHookedMethod(param: HookMethodCallParams?) {
@@ -141,33 +141,5 @@ internal class ActivityJumpCountManager : AbsModelRunHelper() {
                 arrayOf(Intent::class.java, Int::class.java, Bundle::class.java), startActivityCall
             )
         )
-    }
-
-    private var isQueryIp2AddrLoading = false
-    private fun requestIpQueryAddress() {
-        if (isQueryIp2AddrLoading) {
-            return
-        }
-        isQueryIp2AddrLoading = true
-        HttpHelper.getHttpApi().getFormIp2Addr()
-            .requestMainToIo({
-                isQueryIp2AddrLoading = false
-            }, {
-                buildIpQueryAddress(String(it.bytes(), Charset.forName("GBK")))
-            })
-    }
-
-    private fun buildIpQueryAddress(json: String) {
-        try {
-            if (KuaihuoCountManager.getAddress() != null) {
-                return
-            }
-            val newJson = json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1)
-            KuaihuoCountManager.setAddress(Gson().fromJson(newJson, IpQueryAddrss::class.java))
-        } catch (e: Exception) {
-            //出错重置，为可请求状态
-            isQueryIp2AddrLoading = false
-            e.printStackTrace()
-        }
     }
 }

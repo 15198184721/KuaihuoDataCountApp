@@ -22,7 +22,7 @@ class AppGeneralConfigResp(
     val type: String? = null,
 
     /**
-     * 配置的值
+     * 配置的值,通过这个值判断是否打开了此项的配置
      */
     val value:Int? = null,
 

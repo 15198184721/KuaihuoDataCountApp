@@ -7,18 +7,23 @@ import android.content.Context
 import android.util.Log
 import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.FileUtils
+import com.blankj.utilcode.util.SPUtils
+import com.google.gson.Gson
 import com.kuaihuo.data.count.beans.IpQueryAddrss
 import com.kuaihuo.data.count.configs.FileConfig
 import com.kuaihuo.data.count.enums.CountTagEnum
+import com.kuaihuo.data.count.ext.requestMainToIo
 import com.kuaihuo.data.count.managers.ActivityJumpCountManager
 import com.kuaihuo.data.count.managers.ActivityUserStayCountManager
 import com.kuaihuo.data.count.managers.UserLoginCountManager
 import com.kuaihuo.data.count.managers.downs.AppGeneralConfigManager
+import com.kuaihuo.data.count.managers.test.AppTestManager
 import com.kuaihuo.data.count.utils.HttpHelper
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import java.nio.charset.Charset
 
 
 /**
@@ -33,6 +38,7 @@ object KuaihuoCountManager {
 
     //添加需要统计的所有model的工具。必须在此添加到初始化列表。否则无法初始化
     init {
+        modelRunHelperObjs.add(AppTestManager()) //测试工具(主要用于测试各种管理类的处理逻辑)
         modelRunHelperObjs.add(ActivityJumpCountManager()) //添加页面跳转统计工具
         modelRunHelperObjs.add(UserLoginCountManager()) //添加用户登录统计工具
         modelRunHelperObjs.add(ActivityUserStayCountManager()) //添加用户在每个页面停留时间统计工具
@@ -44,8 +50,18 @@ object KuaihuoCountManager {
 
     //路径配置
     val fileConfig: FileConfig = FileConfig()
+
+    //本地缓存地址的SP文件
+    private var saveAddrssFile: String = "cache_address_file"
+
+    //本地缓存地址在SP文件中的key
+    private var saveAddrssKey: String = "cache_arce_address"
+
+    //本地缓存地址在SP文件中最新保存时间的key
+    private var saveAddrssTime: String = "cache_arce_time_key"
+
     //通过IP查询得到的地址信息(大概地址，省市级)
-    private var addressInfo:IpQueryAddrss? = null
+    private var addressInfo: IpQueryAddrss? = null
 
     /**
      * 初始化方法。启动统计
@@ -59,6 +75,8 @@ object KuaihuoCountManager {
 
             //启动构造。为最后一步。其他初始化放在此之前。启动方式为：异步
 //            runModelManager(scanClzz(appCcontext, runHelperPackage))
+            //请求地址信息
+            requestIpQueryAddress()
             //采用直接调用。反射太慢了
             modelRunHelperObjs.forEach {
                 it.initFile()
@@ -74,8 +92,16 @@ object KuaihuoCountManager {
      * 依赖地址信息的相关配置。再次此方法中启动
      * @param add 地址信息
      */
-    fun setAddress(add:IpQueryAddrss){
+    fun setAddress(add: IpQueryAddrss) {
         this.addressInfo = add
+        val cache = SPUtils.getInstance(saveAddrssFile).getString(saveAddrssKey, "")
+        val saveData = Gson().toJson(add)
+        if (cache.trim().isEmpty() || saveData != cache) {
+            //保存到本地(只有两次保存不一致才更新)
+            SPUtils.getInstance(saveAddrssFile).clear()
+            SPUtils.getInstance(saveAddrssFile).put(saveAddrssKey, saveData)
+            SPUtils.getInstance(saveAddrssFile).put(saveAddrssTime, System.currentTimeMillis())
+        }
         //依赖地址信息的。再次方法中启动
         AppGeneralConfigManager().startCount()
     }
@@ -84,7 +110,7 @@ object KuaihuoCountManager {
      * 获取地址信息
      * @return IpQueryAddrss?
      */
-    fun getAddress():IpQueryAddrss?{
+    fun getAddress(): IpQueryAddrss? {
         return addressInfo
     }
 
@@ -228,6 +254,47 @@ object KuaihuoCountManager {
         }
     }
 
+    //设置是否为正在请求地址中
+    private var isQueryIp2AddrLoading = false
+
+    /**
+     * 请求当前用户的大概位置信息
+     */
+    @Synchronized
+    internal fun requestIpQueryAddress() {
+        if (isQueryIp2AddrLoading) {
+            return
+        }
+        val cache = SPUtils.getInstance(saveAddrssFile).getString(saveAddrssKey, "")
+        val saveTime = SPUtils.getInstance(saveAddrssFile).getLong(saveAddrssTime, 0L)
+        val timeStep = 24 * 60 * 60 * 1000 //缓存间隔必须小于一天(配置的缓存只在一天内有效)
+        if (cache.trim().isNotEmpty() &&
+            System.currentTimeMillis() - saveTime < timeStep
+        ) {
+            try {
+                //本地存在缓存。直接使用
+                setAddress(Gson().fromJson(cache, IpQueryAddrss::class.java))
+                isQueryIp2AddrLoading = true
+                //然后使用了本地的。在请求一次网络地址。更新一次本地缓存，保存缓存的有效性
+                HttpHelper.getHttpApi().getFormIp2Addr()
+                    .requestMainToIo({
+                    }, {
+                        buildIpQueryAddress(String(it.bytes(), Charset.forName("GBK")), true)
+                    })
+            } catch (e: Exception) {
+                SPUtils.getInstance(saveAddrssFile).clear()
+            }
+            return
+        }
+        isQueryIp2AddrLoading = true
+        HttpHelper.getHttpApi().getFormIp2Addr()
+            .requestMainToIo({
+                isQueryIp2AddrLoading = false
+            }, {
+                buildIpQueryAddress(String(it.bytes(), Charset.forName("GBK")))
+            })
+    }
+
     /**
      * 文件路径初始化
      */
@@ -240,4 +307,27 @@ object KuaihuoCountManager {
             appCcontext.getDir("count_finish", Context.MODE_PRIVATE).absolutePath
     }
 
+    //json:得到的数据。justSaveCache：只是保存缓存
+    private fun buildIpQueryAddress(json: String, justSaveCache: Boolean = false) {
+        try {
+            if (justSaveCache) {
+                val newJson = json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1)
+                //无论如何。强制更新
+                SPUtils.getInstance(saveAddrssFile).clear()
+                SPUtils.getInstance(saveAddrssFile).put(saveAddrssKey, newJson)
+                SPUtils.getInstance(saveAddrssFile).put(saveAddrssTime, System.currentTimeMillis())
+                return
+            }
+            if (getAddress() != null) {
+                return
+            }
+            val newJson = json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1)
+            setAddress(Gson().fromJson(newJson, IpQueryAddrss::class.java))
+            isQueryIp2AddrLoading = true //设置为请求中。让此请求失效
+        } catch (e: Exception) {
+            //出错重置，为可请求状态
+            isQueryIp2AddrLoading = false
+            e.printStackTrace()
+        }
+    }
 }

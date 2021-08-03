@@ -19,14 +19,32 @@ buildscript {
         jcenter()
     }
     dependencies {
-
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version" //新添加的这一classpath
-
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
+//------------------------------以下是发布至maven本地的库代码--------------------------------
+// 发布maven配置
+apply plugin: 'maven'
+
+//上传到本地仓库的命令，上传完成后配置本地仓库路径即可使用,配置方式：
+// maven { url("D:\\\\maven\\repo") } //配置本地仓库路径
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = PUBLISH_GROUP_ID // 唯一标识（通常为模块包名，也可以任意）
+            pom.artifactId = PUBLISH_ARTIFACT_ID // 项目名称（通常为类库模块名称，也可以任意）
+            pom.version = PUBLISH_VERSION // 版本号
+            pom.packaging = 'aar'
+            // 配置本地仓库路径(注意系统平台，此为windows路径)
+            repository(url: uri("D:\\\\maven\\repo"))
+        }
+    }
+}
+
+//------------------------------以下是发布至maven中央库代码--------------------------------
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 

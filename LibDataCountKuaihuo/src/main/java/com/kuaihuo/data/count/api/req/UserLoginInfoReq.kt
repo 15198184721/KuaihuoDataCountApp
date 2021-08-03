@@ -9,5 +9,7 @@ class UserLoginInfoReq(
     /** 名称 */
     val name:String?,
     /** 0:女，1：男 */
-    val gender:Int? = null
+    val gender:Int? = null,
+    /** 登录地址(登录的大概位置,市级) */
+    val loginAddrss: String? = null
 )

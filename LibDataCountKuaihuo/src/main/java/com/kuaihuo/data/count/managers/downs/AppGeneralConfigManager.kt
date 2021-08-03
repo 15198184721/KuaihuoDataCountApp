@@ -2,6 +2,8 @@ package com.kuaihuo.data.count.managers.downs
 
 import android.app.Activity
 import android.os.Bundle
+import com.blankj.utilcode.util.ActivityUtils
+import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.SPUtils
 import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
@@ -11,32 +13,32 @@ import com.google.gson.Gson
 import com.kuaihuo.data.count.AbsModelRealRunHelper
 import com.kuaihuo.data.count.AbsModelRunHelper
 import com.kuaihuo.data.count.KuaihuoCountManager
-import com.kuaihuo.data.count.api.BaseResp
 import com.kuaihuo.data.count.api.resp.AppGeneralConfigResp
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.ext.countConvertGrayscale
 import com.kuaihuo.data.count.ext.requestMainToIo
+import com.kuaihuo.data.count.managers.downs.configs.ConfigDetailsTask
+import com.kuaihuo.data.count.managers.downs.configs.PublicSacrificeConfigDetails
 import com.kuaihuo.data.count.utils.HttpHelper
+import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 用户配置管理类，通用配置管理类
+ * 用户配置管理类，通用配置管理类。用于管理所有的配置信息。注：
+ *  此配置类的所有配置在Activity的OnCreate方法中进行统一检查也就是粒度可以控制到页面级
  * 作为管理器需要满足条件：
  *  1、必须有无参构造函数
  *  2、必须继承[AbsModelRunHelper]接口。因为启动方式为扫描
  */
 class AppGeneralConfigManager : AbsModelRealRunHelper() {
 
-    companion object {
-
-    }
-
     private var saveConfigFileName = "app_general_xml"
     private var saveKey = ""
     private var isInit = false
     private val generalConfigList: MutableMap<String, AppGeneralConfigResp> = mutableMapOf()
-    //配置有消息的检查缓存
+
+    //配置有效信息的检查缓存
     private val configIsEffectiveCache: MutableMap<String, Boolean> = mutableMapOf()
 
     /*------------------------ Activity.onCreate 拦截 ----------------------------*/
@@ -50,16 +52,27 @@ class AppGeneralConfigManager : AbsModelRealRunHelper() {
     //拦击的方法名称
     private val hookMethod_OnCreate = "onCreate"
 
+    //类型详情的任务集合。各种支持的配置详情处理情况(所有的配置处理模块)
+    private val configDiteilsTasks = mutableListOf<ConfigDetailsTask>(
+        PublicSacrificeConfigDetails(generalConfigList, configIsEffectiveCache) //公祭日的配置处理任务
+    )
+
     //成功拦截回调
     val hook_Activity_OnCreate_Call = object : HookMethodCall {
+        override fun beforeHookedMethod(param: HookMethodCallParams?) {
+            //检查是否为启动页。如果是更新一次配置信息(无论成功与否)
+            if (param?.getThisObject()?.javaClass?.name == ActivityUtils.getLauncherActivity()) {
+                updateAppConfig()
+            }
+            super.beforeHookedMethod(param)
+        }
+
         override fun afterHookedMethod(param: HookMethodCallParams?) {
             try {
-                if (checkConfigIsEffective("public_sacrifice")
-                    && param?.getThisObject() != null &&
-                    param.getThisObject() is Activity
-                ) {
-                    //页面呈现黑白模式
-                    (param.getThisObject() as Activity).countConvertGrayscale()
+                configDiteilsTasks.forEach {
+                    if (it.checkConfigIsEffective()) {
+                        it.runConfigTask(param)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -76,21 +89,28 @@ class AppGeneralConfigManager : AbsModelRealRunHelper() {
         }
         val sdf = SimpleDateFormat("yyyy-MM-dd")
         saveKey = sdf.format(Date(System.currentTimeMillis()))
-        var localConfigJson = SPUtils.getInstance(saveConfigFileName).getString(saveKey, "")
-        var localConfig: MutableList<AppGeneralConfigResp> = mutableListOf()
-        if (localConfigJson.isNotEmpty()) {
-            localConfig = Gson().fromJson(localConfigJson, localConfig.javaClass)
-            if (localConfig != null) {
-                init(localConfig)
-                return
+        try {
+            var localConfigJson = SPUtils.getInstance(saveConfigFileName).getString(saveKey, "")
+            var localConfig: MutableList<AppGeneralConfigResp> = mutableListOf()
+            if (localConfigJson.isNotEmpty()) {
+                localConfig =
+                    Gson().fromJson(localConfigJson, Array<AppGeneralConfigResp>::class.java)
+                        .toMutableList()
+                if (localConfig.isNotEmpty()) {
+                    init(localConfig, true)
+                    return
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         HttpHelper.getHttpApi().getAppConfig()
             .requestMainToIo({
             }, {
+                val s:OkHttpClient
                 try {
-                    if(it.code == 0 && it.data != null) {
-                        init(it.data!!)
+                    if (it.code == 0 && it.data != null) {
+                        init(it.data)
                         //保存到本地
                         SPUtils.getInstance(saveConfigFileName).clear()
                         SPUtils.getInstance(saveConfigFileName).put(saveKey, Gson().toJson(it.data))
@@ -109,12 +129,37 @@ class AppGeneralConfigManager : AbsModelRealRunHelper() {
         return null
     }
 
-    private fun init(data: MutableList<AppGeneralConfigResp>) {
+    //data:配置数据,isLocalCache:是否来自于本地缓存
+    private fun init(data: MutableList<AppGeneralConfigResp>, isLocalCache: Boolean = false) {
         generalConfigList.clear()
         data.forEach {
             generalConfigList[it.type!!] = it
         }
+        //情况缓存的配置信息。让所有配置重新检查一次
+        configIsEffectiveCache.clear()
         isInit = true
+        if (isLocalCache) {
+            updateAppConfig()
+        }
+    }
+
+    //强制更新app的配置信息
+    private fun updateAppConfig() {
+        //本地的。强制重新更新一次配置信息
+        HttpHelper.getHttpApi().getAppConfig()
+            .requestMainToIo({
+            }, {
+                try {
+                    if (it.code == 0 && it.data != null) {
+                        //重新配置一次最新数据
+                        init(it.data)
+                        SPUtils.getInstance(saveConfigFileName).clear()
+                        SPUtils.getInstance(saveConfigFileName).put(saveKey, Gson().toJson(it.data))
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            })
     }
 
     //onCreate拦截
@@ -130,66 +175,6 @@ class AppGeneralConfigManager : AbsModelRealRunHelper() {
             )
         } catch (e: Exception) {
             KuaihuoCountManager.print("执行用户登录统计失败:$e")
-        }
-    }
-
-    val sf = SimpleDateFormat("yyyy-MM-dd")
-    /**
-     * 检查指定的配置是否生效
-     * @param configType String
-     * @return T:生效中，F:未生效
-     */
-    private fun checkConfigIsEffective(configType: String): Boolean {
-        if(configIsEffectiveCache[configType] != null){
-            return configIsEffectiveCache[configType]!! //有缓存。直接使用
-        }
-        if (generalConfigList.isEmpty() ||
-            generalConfigList[configType] == null ||
-            generalConfigList[configType]!!.value != 1
-        ) {
-            configIsEffectiveCache[configType] = false
-            return configIsEffectiveCache[configType]!! //没有是否公祭日的配置。或者配置为不生效了
-        }
-        //检查是否在区域内和有效期
-        if (generalConfigList[configType]!!.effectiveArea == null) {
-            return if(generalConfigList[configType]!!.validPeriod == null){
-                configIsEffectiveCache[configType] = true
-                configIsEffectiveCache[configType]!! //没有设置有效时间。长期有效
-            }else{
-                try {
-                    val curd = sf.parse(generalConfigList[configType]!!.curenntTime)
-                    val effd = sf.parse(generalConfigList[configType]!!.validPeriod!!)
-                    configIsEffectiveCache[configType] = curd.time - effd.time < 0
-                    configIsEffectiveCache[configType]!!
-                }catch (e:Exception){
-                    configIsEffectiveCache[configType] = false
-                    configIsEffectiveCache[configType]!! //无法确定有效期
-                }
-            }
-        }else{
-            //有区域
-            if (generalConfigList[configType]!!.effectiveArea != null &&
-                KuaihuoCountManager.getAddress()!!.cname.startsWith(generalConfigList[configType]!!.effectiveArea!!)
-            ) {
-                return if(generalConfigList[configType]!!.validPeriod == null){
-                    configIsEffectiveCache[configType] = true
-                    configIsEffectiveCache[configType]!! //没有设置有效时间。长期有效
-                }else{
-                    try {
-                        val curd = sf.parse(generalConfigList[configType]!!.curenntTime)
-                        val effd = sf.parse(generalConfigList[configType]!!.validPeriod!!)
-                        configIsEffectiveCache[configType] = curd.time - effd.time < 0
-                        configIsEffectiveCache[configType]!!
-                    }catch (e:Exception){
-                        configIsEffectiveCache[configType] = false
-                        configIsEffectiveCache[configType]!! //无法确定有效期
-                    }
-                }
-            }else{
-                //不在此区域
-                configIsEffectiveCache[configType] = false
-                return configIsEffectiveCache[configType]!!
-            }
         }
     }
 }
