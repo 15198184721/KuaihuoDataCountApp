@@ -1,6 +1,7 @@
 package com.kuaihuo.data.count
 
 import com.chat_hook.HookMethodCallParams
+import com.kuaihuo.data.count.KuaihuoCountManager.IS_COLLECT_DEBUG_INFO
 import com.kuaihuo.data.count.enums.CountTagEnum
 import com.kuaihuo.data.count.ext.requestMainToIo
 import io.reactivex.Observable
@@ -47,6 +48,23 @@ abstract class AbsModelRunHelper {
      * @return 需要吸入的数据
      */
     abstract fun buildRecordWriteContent(param: HookMethodCallParams?): String?
+
+    /**
+     * 检查初始化或者开始初始化，检查初始化条件。满足就初始化不满足就放弃初始化
+     * (不满足表示当前不初始化此模块，相当于禁用此功能)
+     */
+    open fun checkInitStartCount(){
+        //检查是否允许收集debug模式信息
+        if(IS_COLLECT_DEBUG_INFO){
+            startCount()
+            return
+        }
+        if(KuaihuoCountManager.IS_DEBUG){
+            return //debug模式不初始化，表示不手机debug模式下的内容
+        }
+        //满足手机日志的条件
+        startCount()
+    }
 
     /**
      * 初始化保存的文件

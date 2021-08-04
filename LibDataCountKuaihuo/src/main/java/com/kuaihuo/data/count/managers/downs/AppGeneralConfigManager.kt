@@ -1,9 +1,7 @@
 package com.kuaihuo.data.count.managers.downs
 
-import android.app.Activity
 import android.os.Bundle
 import com.blankj.utilcode.util.ActivityUtils
-import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.SPUtils
 import com.chat_hook.HookMethodCall
 import com.chat_hook.HookMethodCallParams
@@ -15,7 +13,6 @@ import com.kuaihuo.data.count.AbsModelRunHelper
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.api.resp.AppGeneralConfigResp
 import com.kuaihuo.data.count.enums.CountTagEnum
-import com.kuaihuo.data.count.ext.countConvertGrayscale
 import com.kuaihuo.data.count.ext.requestMainToIo
 import com.kuaihuo.data.count.managers.downs.configs.ConfigDetailsTask
 import com.kuaihuo.data.count.managers.downs.configs.PublicSacrificeConfigDetails
@@ -79,6 +76,11 @@ class AppGeneralConfigManager : AbsModelRealRunHelper() {
                 KuaihuoCountManager.print("执行配置出现错误:$e")
             }
         }
+    }
+
+    override fun checkInitStartCount() {
+        //此类是无论是否为debug都会启用。所以覆盖掉父类的方法判断逻辑
+        startCount()
     }
 
     override fun startCount() {

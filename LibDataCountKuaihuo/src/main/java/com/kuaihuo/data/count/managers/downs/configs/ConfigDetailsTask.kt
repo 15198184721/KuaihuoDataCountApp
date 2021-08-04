@@ -28,7 +28,7 @@ abstract class ConfigDetailsTask(
     abstract fun getConfigTypeKey(): String
 
     /**
-     * 检查昂起类型的配置是否打开了。也就是服务器配置开启。检查是否开启了此项配置
+     * 检查配置类型的配置是否打开了。也就是服务器配置开启。检查是否开启了此项配置
      * @param config 检查当前的配置是否已经打开了
      * @return T:服务器已开启，F:未开启此项配置(服务器设置为不开启状态、没有此项配置等)
      */

@@ -6,6 +6,7 @@ import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.api.BaseUrlInfo
 import com.kuaihuo.data.count.api.IDataCountApi
 import com.kuaihuo.data.count.api.factory.NullStringToEmptyAdapterFactory
+import com.kuaihuo.data.count.api.interceptors.HeaderInterceptor
 import com.kuaihuo.data.count.api.interceptors.HttpLogger
 import com.kuaihuo.data.count.configs.FileConfig.Companion.RECORD_WAIT_UPLOAD_FILE_MAX_SIZE
 import com.kuaihuo.data.count.ext.getHttpApi
@@ -68,6 +69,7 @@ object HttpHelper {
     //初始化
     private fun initRetrofit(): Retrofit {
         val logInterceptor = HttpLoggingInterceptor(HttpLogger())
+        val headerInterceptor = HeaderInterceptor()
         logInterceptor.level = HttpLoggingInterceptor.Level.BODY
         val gson = GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -80,6 +82,7 @@ object HttpHelper {
                     .connectTimeout(5, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
                     .writeTimeout(15, TimeUnit.SECONDS)
+                    .addNetworkInterceptor(headerInterceptor)
                     .addNetworkInterceptor(logInterceptor)
                     .build()
             )

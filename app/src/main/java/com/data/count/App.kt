@@ -14,7 +14,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        KuaihuoCountManager.initCount(this)
+        KuaihuoCountManager.initCount(this, BuildConfig.DEBUG)
     }
 
 }

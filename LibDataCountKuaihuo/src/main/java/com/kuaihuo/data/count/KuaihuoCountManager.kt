@@ -32,6 +32,10 @@ import java.nio.charset.Charset
 @SuppressLint("StaticFieldLeak")
 object KuaihuoCountManager {
     val TAG = "count"
+    /** 是否为debug模式 */
+    internal var IS_DEBUG = BuildConfig.DEBUG
+    /** 是否收集debug模式应用的统计信息,T:需要收集，F:不收集 */
+    internal var IS_COLLECT_DEBUG_INFO = true
 
     //model的运行helper工具集合。需要初始化的模块集合
     private val modelRunHelperObjs = mutableListOf<AbsModelRunHelper>()
@@ -66,9 +70,11 @@ object KuaihuoCountManager {
     /**
      * 初始化方法。启动统计
      * @param context Context
+     * @param isDebug 是否为debug模式(T:是，F:否),将决定后台数据存储在那个模式下的数据表中
      */
-    fun initCount(context: Application) {
+    fun initCount(context: Application,isDebug:Boolean) {
         try {
+            IS_DEBUG = isDebug
             appCcontext = context
             initFilePath() //初始化文件路径
             //ActivityJumpCountManager.startCount()  //调用页面的调换路径统计
@@ -80,7 +86,7 @@ object KuaihuoCountManager {
             //采用直接调用。反射太慢了
             modelRunHelperObjs.forEach {
                 it.initFile()
-                it.startCount()
+                it.checkInitStartCount()
             }
             modelRunHelperObjs.clear()
         } catch (e: Exception) {
@@ -103,7 +109,7 @@ object KuaihuoCountManager {
             SPUtils.getInstance(saveAddrssFile).put(saveAddrssTime, System.currentTimeMillis())
         }
         //依赖地址信息的。再次方法中启动
-        AppGeneralConfigManager().startCount()
+        AppGeneralConfigManager().checkInitStartCount()
     }
 
     /**

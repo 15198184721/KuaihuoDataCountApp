@@ -19,14 +19,14 @@ interface IDataCountApi : IBaseDataCountApi {
      * 查询指定id的用户
      * @param userId 用户id
      */
-    @GET("appUserCount/findUserId/{userId}")
+    @GET("count/appUserCount/findUserId/{userId}")
     fun findUserId(@Path("userId") userId: String): Observable<BaseResp<UserCountResp>>
 
     /**
      * 提交用户登录统计信息
      * @param req 用户请求体
      */
-    @POST("appUserCount/setUserLoginInfo")
+    @POST("count/appUserCount/setUserLoginInfo")
     fun setUserLoginInfo(@Body req: UserLoginInfoReq): Observable<BaseResp<Int>>
 
 
@@ -35,7 +35,7 @@ interface IDataCountApi : IBaseDataCountApi {
     /**
      * 提交用户登录统计信息
      */
-    @POST("appConfig/getAppConfig")
+    @POST("count/appConfig/getAppConfig")
     fun getAppConfig(): Observable<BaseResp<MutableList<AppGeneralConfigResp>>>
 
 
