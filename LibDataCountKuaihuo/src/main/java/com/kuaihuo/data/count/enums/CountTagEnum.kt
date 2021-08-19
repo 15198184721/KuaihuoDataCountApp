@@ -23,9 +23,15 @@ enum class CountTagEnum {
         "ACTIVITY_USER_STAY",
         (0.003 * 1024 * 1024).toInt() //0.005 = 默认3k(大约30-50条记录提交一次)
     ),
+    /** 用户页面停留的统计,统计每个用户在页面的停留时间,小于最小停留时间(2秒)不统计 */
+    FRAGMENT_USER_STAY(
+        2,
+        "FRAGMENT_USER_STAY",
+        (0.003 * 1024 * 1024).toInt() //0.005 = 默认3k(大约30-50条记录提交一次)
+    ),
     /** 用户登录统计(无文件长度,实时上报) */
     USER_LOGIN(
-        0,
+        3,
         "USER_LOGIN"
     )
     ;

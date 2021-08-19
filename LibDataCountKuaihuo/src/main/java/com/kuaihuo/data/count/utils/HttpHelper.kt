@@ -2,6 +2,7 @@ package com.kuaihuo.data.count.utils
 
 import com.blankj.utilcode.util.FileUtils
 import com.google.gson.GsonBuilder
+import com.kuaihuo.data.count.BuildConfig
 import com.kuaihuo.data.count.KuaihuoCountManager
 import com.kuaihuo.data.count.api.BaseUrlInfo
 import com.kuaihuo.data.count.api.IDataCountApi
@@ -75,17 +76,18 @@ object HttpHelper {
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .registerTypeAdapterFactory(NullStringToEmptyAdapterFactory())
             .create()
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .addNetworkInterceptor(headerInterceptor)
+        //如果是debug输出日志。否则不输出http日志
+        if (BuildConfig.DEBUG) {
+            builder.addNetworkInterceptor(logInterceptor)
+        }
         return Retrofit.Builder()
             .baseUrl(BaseUrlInfo.BASE_URL)
-            .client(
-                OkHttpClient.Builder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(15, TimeUnit.SECONDS)
-                    .writeTimeout(15, TimeUnit.SECONDS)
-                    .addNetworkInterceptor(headerInterceptor)
-                    .addNetworkInterceptor(logInterceptor)
-                    .build()
-            )
+            .client(builder.build())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()

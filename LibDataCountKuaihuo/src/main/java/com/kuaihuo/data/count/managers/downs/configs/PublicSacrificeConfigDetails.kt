@@ -19,7 +19,7 @@ class PublicSacrificeConfigDetails(
     private var isInitRun = false
 
     override fun getConfigTypeKey(): String {
-        return "public_sacrifice";
+        return "public_sacrifice"
     }
 
     /**

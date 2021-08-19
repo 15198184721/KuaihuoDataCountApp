@@ -1,72 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:context=".MainActivity">
-        <Button
-            android:id="@+id/to_test1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="toMain_startActivity" />
-
-        <Button
-            android:id="@+id/to_test2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="toMain_startActivity" />
-
-        <Button
-            android:id="@+id/to_test3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="toMain_startActivityF" />
-
-        <Button
-            android:id="@+id/to_test4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="toMain_startActivityF" />
-
-        <TextView
-            android:id="@+id/connect_msg"
+        android:layout_height="match_parent">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/test_user_login"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="用户成功登录测试"/>
-        <Button
-            android:id="@+id/test_user_login_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="退出登录测试"/>
+            android:orientation="vertical"
+            tools:context=".MainActivity">
+            <Button
+                android:id="@+id/to_test1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="toMain_startActivity" />
 
-        <Button
-            android:id="@+id/connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="测试Http"/>
+            <Button
+                android:id="@+id/to_test2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="toMain_startActivity" />
 
-        <Button
-            android:id="@+id/testAddFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="新增文件"/>
+            <Button
+                android:id="@+id/to_test3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="toMain_startActivityF" />
 
-        <Button
-            android:id="@+id/testDelFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="删除所有文件"/>
+            <Button
+                android:id="@+id/to_test4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="toMain_startActivityF" />
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:id="@+id/connect_msg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/test_user_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="用户成功登录测试"/>
+            <Button
+                android:id="@+id/test_user_login_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="退出登录测试"/>
+
+            <Button
+                android:id="@+id/connect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="测试Http"/>
+
+            <Button
+                android:id="@+id/testAddFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="新增文件"/>
+
+            <Button
+                android:id="@+id/testDelFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除所有文件"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <com.data.count.views.TestViewGroup
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#22FF0000">
+        <com.data.count.views.TestViewChild
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </com.data.count.views.TestViewGroup>
+</RelativeLayout>
