@@ -1,4 +1,4 @@
-// 配置方式：将此配置加入到Model的gradle配置文件末尾即可
+// 配置方式：将此配置加入到Model的gradle配置文件末尾即可(注意：此配置和apply必须在文件尾。否在报错)
 //ext {
 //    PUBLISH_GROUP_ID = "io.github.15198184721"  //申请的mven的GroupId
 //    PUBLISH_ARTIFACT_ID = 'AndroidSandHook'     //项目名,可以理解为除了GroupId之外的二级引用,一般为model名称
