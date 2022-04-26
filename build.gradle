@@ -5,6 +5,7 @@ buildscript {
         maven { url("D:\\\\maven\\repo") }
         google()
         mavenCentral()
+        maven { url 'http://123.57.255.137:8888/repository/lcl_maven_group/' }
         maven { url "https://jitpack.io" }
     }
     dependencies {
@@ -21,6 +22,7 @@ allprojects {
         maven { url("D:\\\\maven\\repo") }
         google()
         mavenCentral()
+        maven { url 'http://123.57.255.137:8888/repository/lcl_maven_group/' }
         maven { url "https://jitpack.io" }
         jcenter() // Warning: this repository is going to shut down soon
     }
